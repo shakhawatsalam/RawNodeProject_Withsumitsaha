@@ -8,21 +8,31 @@
 //dependenciss
 
 const http = require('http');
+const { parse } = require('path');
+const url = require('url');
+const { StringDecoder } = require('string_decoder');
+const { handleReqRes } = require('./helpers/handleReqRes.js')
 
 // app object - module scaffolding
 
 const app = {};
 
 //configuration
-app.config = {};
+app.config = {
+    port: 8080,
+};
 
 //create server
 app.createServer = () => {
-    const server = http.createServer(handleReqRes);
+    const server = http.createServer(app.handleReqRes);
+    server.listen(app.config.port, () => {
+        console.log(`listening to port ${app.config.port}`);
+    });
 };
 
 //handle Request Response
-app.handleReqRes = (req, res) => {
-    // response handle
-    res.end('Hello World');
-};
+app.handleReqRes = handleReqRes;
+
+
+//start the server
+app.createServer();
