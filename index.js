@@ -8,9 +8,6 @@
 //dependenciss
 
 const http = require('http');
-const { parse } = require('path');
-const url = require('url');
-const { StringDecoder } = require('string_decoder');
 const { handleReqRes } = require('./helpers/handleReqRes.js')
 
 // app object - module scaffolding
