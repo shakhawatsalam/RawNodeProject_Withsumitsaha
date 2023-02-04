@@ -8,22 +8,48 @@
 //dependenciss
 
 const http = require('http');
-const { handleReqRes } = require('./helpers/handleReqRes.js')
+const { handleReqRes } = require('./helpers/handleReqRes.js');
+const environment = require('./helpers/environment');
+const data = require('./lib/data');
 
 // app object - module scaffolding
 
 const app = {};
 
 //configuration
-app.config = {
-    port: 8080,
-};
+//@TODO: pore moche dibo
+// Create data
+// data.create('test', 'newFile', { 'name': 'Banglsdesh', 'language': 'Bangla' }, function (err) {
+//     console.log(`error was`, err);
+// });
+
+// Read Data
+// data.read('test', 'newFile', function (err,data) {
+//     console.log(`error was`, err, data);
+// });
+
+
+// Update Data
+// data.update('test', 'newFile', { 'name': 'England', 'language':'english'}, function (err) {
+//     console.log(`error was`, err);
+// });
+
+//Delete file
+// data.delete('test', 'newFile', (err) => {
+//     console.log(err);
+// });
+
+
+
+
 
 //create server
 app.createServer = () => {
+    console.log(environment);
     const server = http.createServer(app.handleReqRes);
-    server.listen(app.config.port, () => {
-        console.log(`listening to port ${app.config.port}`);
+    server.listen(environment.port, () => {
+        console.log(process.env.NODE_ENV);
+        console.log(`listening to port ${environment.port}`);
     });
 };
 

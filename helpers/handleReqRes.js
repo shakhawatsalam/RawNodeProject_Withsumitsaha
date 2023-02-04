@@ -5,11 +5,13 @@
  * Date: 02/03/2022  
  */
 
+
 //dependence 
 const url = require('url');
 const { StringDecoder } = require('string_decoder');
 const routes = require('../routes.js');
 const { notFoundHandler } = require('../handlers/routeHandlers/notfoundHandler.js');
+
 
 //module scaffolding
 const handler = {};
@@ -39,18 +41,8 @@ handler.handleReqRes = (req, res) => {
     let realData = '';
 
     const chosenHandler = routes[trimmedPath] ? routes[trimmedPath] : notFoundHandler;
-    
-    chosenHandler(requestProperties, (statusCode, payload) => {
-        statusCode = typeof (statusCode) === 'number' ? statusCode : 500;
-        payload = typeof (payload) === 'object' ? payload : {};
-
-        const payloadString = JSON.stringify(payload);
 
 
-        //return the final respose 
-        res.writeHead(statusCode);
-        res.end(payloadString);
-    });
 
 
     req.on('data', (buffer) => {
@@ -59,11 +51,23 @@ handler.handleReqRes = (req, res) => {
 
     req.on('end', () => {
         realData += decoder.end();
-        // console.log(realData);
-        // response handle
-        res.end('Hello World');
+
+        chosenHandler(requestProperties, (statusCode, payload) => {
+            statusCode = typeof (statusCode) === 'number' ? statusCode : 500;
+            payload = typeof (payload) === 'object' ? payload : {};
+
+            const payloadString = JSON.stringify(payload);
+
+
+            //return the final respose 
+            res.writeHead(statusCode);
+            res.end(payloadString);
+        });
+
+
     });
 };
 
 
 module.exports = handler;
+
