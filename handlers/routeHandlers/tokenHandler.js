@@ -98,7 +98,7 @@ handler._token.get = (requestProperties, callback) => {
     }
 };
 
-// @todo : Authentication
+
 // Users Put Method 'PUT'USER/-UPDATE USER
 handler._token.put = (requestProperties, callback) => {
     const id = typeof (requestProperties.body.id) === 'string' && requestProperties.body.id.trim().length === 20 ? requestProperties.body.id : false;
@@ -135,11 +135,58 @@ handler._token.put = (requestProperties, callback) => {
 
 };
 
-// @TODO: Authentication 
+
 // Users delete Method 'DELETE'USER/-DELETE USER
 handler._token.delete = (requestProperties, callback) => {
+    //check the token is valid
+    const id = typeof (requestProperties.queryStringObject.id) === 'string' && requestProperties.queryStringObject.id.trim().length === 20 ? requestProperties.queryStringObject.id : false;
 
+
+    //
+    if (id) {
+        //lookup the user
+        data.read('tokens', id, (err1, tokenData) => {
+            if (!err1 && tokenData) {
+                data.delete('tokens', id, (err2) => {
+                    if (!err2) {
+                        callback(200, {
+                            message: 'Token was successfully deleted',
+                        })
+                    } else {
+                        callback(500, {
+                            error: 'There was a server side error!!'
+                        })
+                    }
+                });
+            } else {
+                callback(500, {
+                    error: "There was a server side error!!"
+                })
+            }
+        });
+    } else {
+        callback(400, {
+            error: "There was a problem in your request"
+        })
+    }
 };
+
+//NORMAL VERIFY FUNCTION
+handler._token.verify = (id, phone, callback) => {
+    data.read('tokens', id, (err, tokenData) => {
+  
+        if (!err && tokenData) {
+            if (parseJSON(tokenData).phone === phone && parseJSON(tokenData).expires > Date.now()) {
+
+                callback(true);
+            } else {
+                callback(false);
+            }
+        } else {
+            callback(false);
+        }
+    });
+}
 
 
 module.exports = handler;

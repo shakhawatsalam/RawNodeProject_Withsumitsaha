@@ -9,6 +9,7 @@
 const data = require('../../lib/data.js');
 const { hash } = require('../../helpers/utilities.js');
 const { parseJSON } = require('../../helpers/utilities.js');
+const tokenHandler = require('./tokenHandler.js')
 
 
 
@@ -88,7 +89,7 @@ handler._users.post = (requestProperties, callback) => {
 
 };
 
-// @TODO: Authentication 
+
 // Users Get Method 'GET'/USER-READ USER
 handler._users.get = (requestProperties, callback) => {
 
@@ -97,19 +98,30 @@ handler._users.get = (requestProperties, callback) => {
 
     //
     if (phone) {
-        // lookup the user
-        data.read('users', phone, (err, u) => {
-            const user = { ...parseJSON(u) };
-            if (!err && user) {
-                delete user.password;
-                callback(200, user);
+        // verify token
+        let token = typeof (requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
 
+        tokenHandler._token.verify(token, phone, (tokenId) => {
+            if (tokenId) {
+                // lookup the user
+                data.read('users', phone, (err, u) => {
+                    const user = { ...parseJSON(u) };
+                    if (!err && user) {
+                        delete user.password;
+                        callback(200, user);
+
+                    } else {
+                        callback(400, {
+                            error: 'Requested user was not found!'
+                        });
+                    }
+                })
             } else {
-                callback(400, {
-                    error: 'Requested user was not found!'
-                });
+                callback(403, {
+                    error: 'Authentication Failure!',
+                })
             }
-        })
+        });
     } else {
         callback(400, {
             error: 'Requested user was not found!'
@@ -118,7 +130,7 @@ handler._users.get = (requestProperties, callback) => {
 
 };
 
-// @todo : Authentication
+
 // Users Put Method 'PUT'USER/-UPDATE USER
 handler._users.put = (requestProperties, callback) => {
     //check the phone number is valid
@@ -134,37 +146,49 @@ handler._users.put = (requestProperties, callback) => {
     if (phone) {
         if (firstName || lastName || password) {
             // lookup the user
-            data.read('users', phone, (err1, uData) => {
-                const userData = { ...parseJSON(uData) };
-                if (!err1 && userData) {
-                    if (firstName) {
-                        userData.firstName = firstName;
-                    }
+            // verify token
+            let token = typeof (requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
 
-                    if (lastName) {
-                        userData.lastName = lastName;
-                    }
+            tokenHandler._token.verify(token, phone, (tokenId) => {
+                if (tokenId) {
+                    // lookup the user
+                    data.read('users', phone, (err1, uData) => {
+                        const userData = { ...parseJSON(uData) };
+                        if (!err1 && userData) {
+                            if (firstName) {
+                                userData.firstName = firstName;
+                            }
 
-                    if (password) {
-                        userData.password = hash(password);
-                    }
+                            if (lastName) {
+                                userData.lastName = lastName;
+                            }
 
-                    //store to database or update to database
-                    data.update('users', phone, userData, (err2) => {
-                        if (!err2) {
-                            callback(200, {
-                                message: 'User was updated successfully',
-                            })
+                            if (password) {
+                                userData.password = hash(password);
+                            }
+
+                            //store to database or update to database
+                            data.update('users', phone, userData, (err2) => {
+                                if (!err2) {
+                                    callback(200, {
+                                        message: 'User was updated successfully',
+                                    })
+                                } else {
+                                    callback(500, {
+                                        error: 'There was a problem in the server side',
+                                    });
+                                }
+                            });
                         } else {
-                            callback(500, {
-                                error: 'There was a problem in the server side',
+                            callback(400, {
+                                error: 'You Have a problem in your request',
                             });
                         }
                     });
                 } else {
-                    callback(400, {
-                        error: 'You Have a problem in your request',
-                    });
+                    callback(403, {
+                        error: 'Authentication Failure!',
+                    })
                 }
             });
         } else {
@@ -190,26 +214,39 @@ handler._users.delete = (requestProperties, callback) => {
 
     //
     if (phone) {
-        //lookup the user
-        data.read('users', phone, (err1, userData) => {
-            if (!err1 && userData) {
-                data.delete('users', phone, (err2) => {
-                    if (!err2) {
-                        callback(200, {
-                            message: 'User was successfully deleted',
-                        })
+        // verify token
+        let token = typeof (requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
+
+        tokenHandler._token.verify(token, phone, (tokenId) => {
+            console.log(tokenId)
+            if (tokenId) {
+                //lookup the user
+                data.read('users', phone, (err1, userData) => {
+                    if (!err1 && userData) {
+                        data.delete('users', phone, (err2) => {
+                            if (!err2) {
+                                callback(200, {
+                                    message: 'User was successfully deleted',
+                                })
+                            } else {
+                                callback(500, {
+                                    error: 'There was a server side error!!'
+                                })
+                            }
+                        });
                     } else {
                         callback(500, {
-                            error: 'There was a server side error!!'
+                            error: "There was a server side error!!"
                         })
                     }
                 });
             } else {
-                callback(500, {
-                    error: "There was a server side error!!"
+                callback(403, {
+                    error: 'Authentication Failure!',
                 })
             }
         });
+       
     } else {
         callback(400, {
             error: "There was a problem in your request"
