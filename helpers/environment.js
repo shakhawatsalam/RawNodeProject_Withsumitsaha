@@ -16,6 +16,7 @@ environment.staging = {
     port: 3000,
     envName: 'staging',
     secretKey: 'hljjlljljljlkjlj',
+    maxChecks: 5
 };
 
 //production
@@ -23,6 +24,7 @@ environment.production = {
     port: 5000,
     envName: 'production',
     secretKey: 'dkjakjdkfjlajdkljfkj',
+    maxChecks: 5
 };
 
 
