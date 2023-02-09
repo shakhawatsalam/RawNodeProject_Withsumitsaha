@@ -10,11 +10,18 @@
 const http = require('http');
 const { handleReqRes } = require('./helpers/handleReqRes.js');
 const environment = require('./helpers/environment');
-const data = require('./lib/data');
+// const data = require('./lib/data');
+const { sendTwilioSms } = require('./helpers/notification.js');
 
 // app object - module scaffolding
 
 const app = {};
+
+
+
+sendTwilioSms('01876288562', 'Hello world', (err) => {
+    console.log(`this is the error`, err);
+});
 
 //configuration
 //@TODO: pore moche dibo
@@ -45,7 +52,6 @@ const app = {};
 
 //create server
 app.createServer = () => {
-    console.log(environment);
     const server = http.createServer(app.handleReqRes);
     server.listen(environment.port, () => {
         console.log(process.env.NODE_ENV);
