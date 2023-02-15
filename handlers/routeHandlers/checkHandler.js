@@ -73,6 +73,7 @@ handler._check.post = (requestProperties, callback) => {
                                         userPhone,
                                         protocol,
                                         url,
+                                        method,
                                         successCodes,
                                         timeoutSeconds,
                                     };

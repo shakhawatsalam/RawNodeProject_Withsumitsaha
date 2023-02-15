@@ -7,11 +7,17 @@
 
 const server = require('./lib/server.js');
 const workers = require('./lib/worker.js');
+const { sendTwilioSms } = require('./helpers/notification');
 // const data = require('./lib/data');
 
 // app object - module scaffolding
 
 const app = {};
+
+
+sendTwilioSms('01876288562', 'test', (err) => {
+    console.log(`this is ${err}`);
+})
 
 //configuration
 //@TODO: pore moche dibo
